@@ -227,12 +227,24 @@ PrefabInstance:
       value: XR Origin (VR)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects:
-    - {fileID: 6322597107284148225, guid: f715bfddb3580e14683742dafbb15abc, type: 3}
-    - {fileID: 8564703032325910330, guid: f715bfddb3580e14683742dafbb15abc, type: 3}
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1807962007096322890, guid: f715bfddb3580e14683742dafbb15abc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: f715bfddb3580e14683742dafbb15abc, type: 3}
+--- !u!114 &482012526 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4219894850534345091, guid: f715bfddb3580e14683742dafbb15abc, type: 3}
+  m_PrefabInstance: {fileID: 482012525}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9541d86e2fd84c1d9990edf0852d74ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &577071357 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4103395466030174051, guid: 12e7c6e2a052ca344a4b1b5616e1597c, type: 3}
@@ -263,6 +275,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2182042065240794548, guid: d178262389fffbe48830cf31df2428f3, type: 3}
+      propertyPath: console
+      value: 
+      objectReference: {fileID: 482012526}
     - target: {fileID: 4773944665187768899, guid: d178262389fffbe48830cf31df2428f3, type: 3}
       propertyPath: m_Name
       value: XR Interaction Manager
