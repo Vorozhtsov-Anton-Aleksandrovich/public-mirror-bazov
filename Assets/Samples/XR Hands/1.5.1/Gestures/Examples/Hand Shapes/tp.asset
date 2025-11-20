@@ -31,13 +31,13 @@ MonoBehaviour:
     m_Targets:
     - m_ShapeType: 0
       m_UpperTolerance: 1
-      m_LowerTolerance: 0.4
+      m_LowerTolerance: 0.55
       m_Tolerance: 0
       m_Desired: 1
   - m_FingerID: 4
     m_Targets:
     - m_ShapeType: 0
       m_UpperTolerance: 1
-      m_LowerTolerance: 0.3
+      m_LowerTolerance: 0.55
       m_Tolerance: 0
       m_Desired: 1

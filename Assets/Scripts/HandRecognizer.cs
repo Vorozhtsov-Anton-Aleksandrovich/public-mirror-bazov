@@ -66,8 +66,6 @@ public class HandRecognizer : MonoBehaviour
 
         if (leftHandEvents) leftHandEvents.jointsUpdated.AddListener(OnLeftHand);
         if (rightHandEvents) rightHandEvents.jointsUpdated.AddListener(OnRightHand);
-        if (leftHandEvents) leftHandEvents.jointsUpdated.AddListener(OnLeftHand);
-        if (rightHandEvents) rightHandEvents.jointsUpdated.AddListener(OnRightHand);
         
     }
 
@@ -121,7 +119,7 @@ public class HandRecognizer : MonoBehaviour
                 if (pointingGesture && pointingGesture.CheckConditions(args))
                 {
                     DebugInfoStaticController.ToTerminalQuoe($"✅ ЖЕСТ РАСПОЗНАН: {(isLeft ? "ЛЕВАЯ" : "ПРАВАЯ")} рука");
-                    if (TryGetTeleportTarget(hand, out Vector3 hitPoint))
+                    if (TryGetTeleportTarget(hand, out Vector3 hitPoint, isLeft))
                     {
                         target = hitPoint;
                         DebugInfoStaticController.ToTerminalQuoe($"🎯 Цель найдена: {hitPoint}");
@@ -142,7 +140,7 @@ public class HandRecognizer : MonoBehaviour
                 if (pointingGesture.CheckConditions(args))
                 {
                     DebugInfoStaticController.ToTerminalQuoe($"🟩 Жест продолжается");
-                    if (TryGetTeleportTarget(hand, out Vector3 hitPoint))
+                    if (TryGetTeleportTarget(hand, out Vector3 hitPoint, isLeft))
                     {
                         target = hitPoint;
                         DebugInfoStaticController.ToTerminalQuoe($"🎯 Цель обновлена: {hitPoint}");
@@ -224,12 +222,16 @@ public class HandRecognizer : MonoBehaviour
     // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
     // ─────────────────────────────────────────────
 
-    bool TryGetTeleportTarget(XRHand hand, out Vector3 hitPoint)
+    bool TryGetTeleportTarget(XRHand hand, out Vector3 hitPoint, bool isLeft)
     {
         hitPoint = Vector3.zero;
 
-        if (!TryGetPointingRay(hand, out Ray ray))
+        if (!TryGetPointingRay(hand, out Ray ray, isLeft))
+        {
+            DebugInfoStaticController.ToTerminalQuoe($"Луч из {ray.origin} в направлении {ray.direction}");
             return false;
+        }
+            
 
         if (Physics.Raycast(ray, out RaycastHit hit, maxTeleportDistance, teleportLayerMask))
         {
@@ -240,36 +242,55 @@ public class HandRecognizer : MonoBehaviour
         return false;
     }
 
-    bool TryGetPointingRay(XRHand hand, out Ray ray)
+    bool TryGetPointingRay(XRHand hand, out Ray ray, bool isLeft)
     {
+        if (!isLeft)
+            Debug.DrawRay(rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.position, rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.forward * 10f, Color.yellow, 0.1f);
+        else
+            Debug.DrawRay(leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.position, leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.forward * 10f, Color.yellow, 0.1f);
+        
         ray = default;
 
         var wrist = hand.GetJoint(XRHandJointID.Wrist);
-        var index = hand.GetJoint(XRHandJointID.IndexDistal);
-        var middle = hand.GetJoint(XRHandJointID.MiddleDistal);
+        var index = hand.GetJoint(XRHandJointID.IndexProximal);
+        var middle = hand.GetJoint(XRHandJointID.MiddleProximal);
 
-        bool wristOK = wrist.TryGetPose(out Pose w);
-        bool indexOK = index.TryGetPose(out Pose i);
-        bool middleOK = middle.TryGetPose(out Pose m);
-
-        if (!wristOK)
-            DebugInfoStaticController.ToTerminalQuoe(">    Запястье не отслеживается");
-        if (!indexOK)
-            DebugInfoStaticController.ToTerminalQuoe(">    Указательный палец не отслеживается");
-        if (!middleOK)
-            DebugInfoStaticController.ToTerminalQuoe(">    Средний палец не отслеживается");
-
-        if (!wristOK || !indexOK || !middleOK)
+        if (!wrist.TryGetPose(out Pose w) || 
+            !index.TryGetPose(out Pose i) || 
+            !middle.TryGetPose(out Pose m))
         {
             return false;
         }
 
-        Vector3 origin = w.position;
-        Vector3 direction = ((i.position + m.position) * 0.5f - origin).normalized;
-        ray = new Ray(origin, direction);
+        //// 🔥 ИСПОЛЬЗУЕМ МИРОВЫЕ ПОЗИЦИИ НАПРЯМУЮ
+        //Vector3 origin = w.position; // ← позиция запястья в мировом пространстве
+//
+        //// Направление — от запястья к средней точке кончиков пальцев
+        //Vector3 tipCenter = (i.position + m.position) * 0.5f;
+        //Vector3 direction = (tipCenter - origin).normalized;
+//
+        //// 🔥 ДОБАВЛЯЕМ НАКЛОН ВНИЗ — чтобы луч пересекал пол
+        //direction.y -= 0.5f; // ← наклон вниз
+        //direction.Normalize(); // ← нормализуем обратно
 
-        Debug.DrawRay(origin, direction * 10f, Color.red, 0.1f);
+        if (!isLeft)
+            ray = new Ray(rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.position, rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.forward);
+        else
+            ray = new Ray(leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.position, leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.forward);
+
+        //ray = new Ray(origin, direction);
+
+        // 🔥 ОТЛАДКА: рисуем луч в Scene View
+        //Debug.DrawRay(origin, direction * 10f, Color.red, 0.1f);
+
+        // Логируем начало луча
+        if (!isLeft)
+           DebugInfoStaticController.ToTerminalQuoe($"🎯 Начало луча: {rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.position}");
+        else
+           DebugInfoStaticController.ToTerminalQuoe($"🎯 Начало луча: {leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.position}");
+
         return true;
+    
     }
 
     bool AreFingersSqueezed(XRHand hand, XRHandJointID[] tips, float threshold)
