@@ -20,18 +20,18 @@ public class HandRecognizer : MonoBehaviour
     public int confirmationFrames = 2;
 
     [Header("🔹 Телепортация")]
-    public LayerMask teleportLayerMask = 1; // ← обязательно настрой!
+    public LayerMask teleportLayerMask = 1; // обязательно
     public float maxTeleportDistance = 10f;
     public GameObject teleportPreviewPrefab; // опционально
 
     [Header("🔹 Ссылки")]
-    public XROrigin xrOrigin; // ← должен быть назначен!
+    public XROrigin xrOrigin; // обязательно
     public XRHandTrackingEvents leftHandEvents;
     public XRHandTrackingEvents rightHandEvents;
 
     // ДОБАВЛЯЕМ: ссылку на Teleportation Provider (из XRI 3.0+)
     [Header("🔹 Teleportation Provider (XRI 3.0+)")]
-    public TeleportationProvider teleportationProvider; // ← ПРИКРЕПИ ЭТО В ИНСПЕКТОРЕ!
+    public TeleportationProvider teleportationProvider; // ПРИКРЕПИ ЭТО В ИНСПЕКТОРЕ
 
     // ─────────────────────────────────────────────
     // СОСТОЯНИЯ И КЭШ
@@ -116,7 +116,9 @@ public class HandRecognizer : MonoBehaviour
         switch (state)
         {
             case HandState.Idle:
-                if (pointingGesture && pointingGesture.CheckConditions(args))
+                DebugInfoStaticController.ToTerminalQuoe($"{(isLeft ? "ЛЕВАЯ" : "ПРАВАЯ")}\n{(isLeft ? leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.up.ToString() : rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.up.ToString())}");
+                float upY = isLeft ? leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.up.y : rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.up.y;
+                if (pointingGesture && pointingGesture.CheckConditions(args) && upY < 0)
                 {
                     DebugInfoStaticController.ToTerminalQuoe($"✅ ЖЕСТ РАСПОЗНАН: {(isLeft ? "ЛЕВАЯ" : "ПРАВАЯ")} рука");
                     if (TryGetTeleportTarget(hand, out Vector3 hitPoint, isLeft))
