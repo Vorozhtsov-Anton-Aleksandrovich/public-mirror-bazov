@@ -112,11 +112,12 @@ public class HandRecognizer : MonoBehaviour
         }
 
         DebugInfoStaticController.ToTerminalQuoe($"✅ Рука {(isLeft ? "левая" : "правая")} трекируется");
+        float up_velocity = isLeft ? leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.up.y : rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.up.y;
 
         switch (state)
         {
             case HandState.Idle:
-                if (pointingGesture && pointingGesture.CheckConditions(args))
+                if (pointingGesture && pointingGesture.CheckConditions(args) && up_velocity < 0.0f)
                 {
                     DebugInfoStaticController.ToTerminalQuoe($"✅ ЖЕСТ РАСПОЗНАН: {(isLeft ? "ЛЕВАЯ" : "ПРАВАЯ")} рука");
                     if (TryGetTeleportTarget(hand, out Vector3 hitPoint, isLeft))

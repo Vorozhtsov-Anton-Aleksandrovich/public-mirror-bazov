@@ -1,15 +1,32 @@
+// QuestStep.cs
 using UnityEngine;
+using UnityEngine.Events;
 
-/// <summary>
-/// Абстрактный базовый класс для любого шага квеста.
-/// Любой конкретный шаг (доставка, стояние и т.д.) должен наследоваться от этого класса
-/// и реализовывать метод Complete().
-/// </summary>
 public abstract class QuestStep : MonoBehaviour
 {
+    [Header("События шага")]
+    public UnityEvent OnStepStarted;
+    public UnityEvent OnStepCompleted;
+
+    public bool isCompleted = false; // ← защита от двойного завершения
+
+    public void StartStep()
+    {
+        if (gameObject.activeInHierarchy)
+        {
+            OnStepStarted?.Invoke();
+        }
+    }
+
     /// <summary>
-    /// Вызывается, когда шаг успешно завершён.
-    /// Должен уведомить QuestSequencer о завершении.
+    /// Завершает шаг, но только один раз.
     /// </summary>
-    public abstract void Complete();
+    protected void FinishStep()
+    {
+        if (isCompleted) return; // ← уже завершён — выходим
+
+        isCompleted = true;
+        OnStepCompleted?.Invoke();
+        QuestSequencer.Instance?.CompleteCurrentStep();
+    }
 }

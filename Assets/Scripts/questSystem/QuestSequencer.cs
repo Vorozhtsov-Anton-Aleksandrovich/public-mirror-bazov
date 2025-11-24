@@ -4,33 +4,30 @@ using System.Collections.Generic;
 
 /// <summary>
 /// Управляет последовательным выполнением шагов квеста.
-/// Хранит очередь шагов и автоматически активирует следующий после завершения текущего.
-/// Поддерживает события начала и завершения всего квеста для подключения анимаций, звуков и т.п.
+/// Использует List вместо Queue для большей гибкости.
+/// Поддерживает события:
+/// - всего квеста (OnQuestStarted / OnQuestCompleted),
+/// - каждого шага (OnStepStarted / OnStepCompleted).
 /// </summary>
 public class QuestSequencer : MonoBehaviour
 {
-    // Синглтон для удобного доступа (опционально, но удобно на этом этапе)
     public static QuestSequencer Instance;
 
-    // === СОБЫТИЯ КВЕСТА ===
+    // === События КВЕСТА ===
     [Header("События квеста")]
-    [Tooltip("Вызывается при активации первого шага (начало квеста)")]
     public UnityEvent OnQuestStarted;
-
-    [Tooltip("Вызывается после завершения последнего шага (конец квеста)")]
     public UnityEvent OnQuestCompleted;
 
-    // === ОЧЕРЕДЬ ШАГОВ ===
-    [Header("Очередь шагов")]
-    [Tooltip("Перетащите сюда GameObject'ы с компонентами DeliveryStep или StandingStep в нужном порядке.\n" +
-             "Все шаги должны быть изначально ВЫКЛЮЧЕНЫ (SetActive(false)).")]
-    public Queue<QuestStep> stepQueue = new Queue<QuestStep>();
+    // === СПИСОК ШАГОВ ===
+    [Header("Список шагов (порядок выполнения)")]
+    [Tooltip("Перетащите сюда шаги в нужном порядке. Все шаги должны быть изначально ВЫКЛЮЧЕНЫ.")]
+    public List<QuestStep> steps = new List<QuestStep>();
 
-    private bool hasStarted = false; // Флаг, чтобы не вызывать OnQuestStarted дважды
+    private int currentStepIndex = -1;
+    private bool questStarted = false;
 
     private void Awake()
     {
-        // Гарантируем единственный экземпляр
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -38,13 +35,20 @@ public class QuestSequencer : MonoBehaviour
         }
         Instance = this;
 
-        // Пытаемся запустить первый шаг
+        // Гарантируем, что все шаги выключены при старте
+        foreach (var step in steps)
+        {
+            if (step != null)
+                step.gameObject.SetActive(false);
+        }
+
+        // Запускаем первый шаг, если есть
         TryStartNextStep();
     }
 
     /// <summary>
-    /// Вызывается из любого завершённого шага.
-    /// Продвигает очередь и запускает следующий шаг (если есть).
+    /// Вызывается из шага после его завершения.
+    /// Продвигает индекс и запускает следующий шаг (если есть).
     /// </summary>
     public void CompleteCurrentStep()
     {
@@ -52,34 +56,38 @@ public class QuestSequencer : MonoBehaviour
     }
 
     /// <summary>
-    /// Пытается запустить следующий шаг из очереди.
-    /// Если шагов больше нет — вызывает OnQuestCompleted.
+    /// Пытается запустить следующий шаг по индексу.
     /// Если это первый шаг — вызывает OnQuestStarted.
+    /// Если шагов больше нет — вызывает OnQuestCompleted.
     /// </summary>
     private void TryStartNextStep()
     {
-        if (stepQueue.Count > 0)
+        print($"List<QuestStep> Count: {steps.Count}\nActual: {currentStepIndex + 1}");
+        currentStepIndex++;
+
+        if (currentStepIndex < steps.Count)
         {
-            var nextStep = stepQueue.Dequeue();
-
-            if (nextStep != null)
+            var step = steps[currentStepIndex];
+            if (step != null)
             {
-                nextStep.gameObject.SetActive(true); // Активируем шаг
+                step.gameObject.SetActive(true);
+                step.StartStep(); // ← вызывает OnStepStarted
 
-                if (!hasStarted)
+                if (!questStarted)
                 {
-                    hasStarted = true;
-                    OnQuestStarted?.Invoke(); // Квест начался!
+                    questStarted = true;
+                    OnQuestStarted?.Invoke();
                 }
             }
             else
             {
-                Debug.LogWarning("Обнаружен null-шаг в очереди квеста!");
+                Debug.LogWarning($"Шаг с индексом {currentStepIndex} — null!");
+                Invoke(nameof(TryStartNextStep), 0.5f);
             }
         }
         else
         {
-            // Квест полностью завершён
+            // Квест завершён
             OnQuestCompleted?.Invoke();
         }
     }

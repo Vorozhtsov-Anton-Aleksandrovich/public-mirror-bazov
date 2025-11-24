@@ -13,7 +13,7 @@ public static class DebugInfoStaticController
         if (DebugInfoStaticController.TerminalList.Count > 24)
         {
             DebugInfoStaticController.TerminalList.RemoveAt(0);
-            Debug.Log(line);
+            //Debug.Log(line);
         }
             
         TerminalList.Add(line);
