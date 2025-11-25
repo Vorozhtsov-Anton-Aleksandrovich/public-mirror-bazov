@@ -22,7 +22,7 @@ public class DeliveryStep : QuestStep
         if (deliveredItem.tag == tagTargetItem)
         {
             deliveredItem.SetActive(false);
-            FinishStep(); // ← завершает шаг и вызывает OnStepCompleted
+            FinishStep(); // завершает шаг и вызывает OnStepCompleted
         }
     }
 }

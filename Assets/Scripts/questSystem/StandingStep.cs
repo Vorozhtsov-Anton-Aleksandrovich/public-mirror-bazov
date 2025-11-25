@@ -1,4 +1,3 @@
-// StandingStep.cs
 using UnityEngine;
 
 public class StandingStep : QuestStep
@@ -19,6 +18,6 @@ public class StandingStep : QuestStep
 
     private void OnPlayerEntered()
     {
-        FinishStep(); // ← завершает шаг
+        FinishStep(); // завершает шаг
     }
 }

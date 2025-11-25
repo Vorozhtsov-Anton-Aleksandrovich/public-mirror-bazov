@@ -1,4 +1,3 @@
-// QuestStep.cs
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -8,7 +7,7 @@ public abstract class QuestStep : MonoBehaviour
     public UnityEvent OnStepStarted;
     public UnityEvent OnStepCompleted;
 
-    public bool isCompleted = false; // ← защита от двойного завершения
+    public bool isCompleted = false; // защита от двойного завершения
 
     public void StartStep()
     {
@@ -23,7 +22,7 @@ public abstract class QuestStep : MonoBehaviour
     /// </summary>
     protected void FinishStep()
     {
-        if (isCompleted) return; // ← уже завершён — выходим
+        if (isCompleted) return; // уже завершён — выходим
 
         isCompleted = true;
         OnStepCompleted?.Invoke();

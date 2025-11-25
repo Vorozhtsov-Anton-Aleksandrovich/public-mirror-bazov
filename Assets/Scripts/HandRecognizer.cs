@@ -52,18 +52,6 @@ public class HandRecognizer : MonoBehaviour
 
     void OnEnable()
     {
-        DebugInfoStaticController.ToTerminalQuoe("🔄 Hand Recognizer включён");
-
-        if (leftHandEvents == null)
-            DebugInfoStaticController.ToTerminalQuoe("❌ Left Hand Events не назначен!");
-        else
-            DebugInfoStaticController.ToTerminalQuoe($"✅ Left Hand Events: {leftHandEvents.name}");
-
-        if (rightHandEvents == null)
-            DebugInfoStaticController.ToTerminalQuoe("❌ Right Hand Events не назначен!");
-        else
-            DebugInfoStaticController.ToTerminalQuoe($"✅ Right Hand Events: {rightHandEvents.name}");
-
         if (leftHandEvents) leftHandEvents.jointsUpdated.AddListener(OnLeftHand);
         if (rightHandEvents) rightHandEvents.jointsUpdated.AddListener(OnRightHand);
         
@@ -92,7 +80,6 @@ public class HandRecognizer : MonoBehaviour
 
    void ProcessHand(XRHandJointsUpdatedEventArgs args, bool isLeft)
     {
-        DebugInfoStaticController.ToTerminalQuoe($"🔄 Обработка {(isLeft ? "левой" : "правой")} руки");
 
         // Используем обычные переменные вместо ref — чтобы избежать CS1510
         HandState state = isLeft ? leftState : rightState;
@@ -103,7 +90,6 @@ public class HandRecognizer : MonoBehaviour
         var hand = args.hand;
         if (!hand.isTracked)
         {
-            DebugInfoStaticController.ToTerminalQuoe($"❌ Рука {(isLeft ? "левая" : "правая")} не трекируется");
             if (isLeft) { leftState = HandState.Idle; leftConfirm = 0; }
             else { rightState = HandState.Idle; rightConfirm = 0; }
             if (preview) Destroy(preview);
@@ -111,7 +97,6 @@ public class HandRecognizer : MonoBehaviour
             return;
         }
 
-        DebugInfoStaticController.ToTerminalQuoe($"✅ Рука {(isLeft ? "левая" : "правая")} трекируется");
         float up_velocity = isLeft ? leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.up.y : rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.up.y;
 
         switch (state)
@@ -119,11 +104,9 @@ public class HandRecognizer : MonoBehaviour
             case HandState.Idle:
                 if (pointingGesture && pointingGesture.CheckConditions(args) && up_velocity < 0.0f)
                 {
-                    DebugInfoStaticController.ToTerminalQuoe($"✅ ЖЕСТ РАСПОЗНАН: {(isLeft ? "ЛЕВАЯ" : "ПРАВАЯ")} рука");
                     if (TryGetTeleportTarget(hand, out Vector3 hitPoint, isLeft))
                     {
                         target = hitPoint;
-                        DebugInfoStaticController.ToTerminalQuoe($"🎯 Цель найдена: {hitPoint}");
                         if (teleportPreviewPrefab)
                             preview = Instantiate(teleportPreviewPrefab, hitPoint, Quaternion.identity);
                     }
@@ -131,7 +114,6 @@ public class HandRecognizer : MonoBehaviour
                     {
                         target = null;
                         preview = null;
-                        DebugInfoStaticController.ToTerminalQuoe("❌ Цель НЕ найдена");
                     }
                     state = HandState.Pointing;
                 }
@@ -140,11 +122,9 @@ public class HandRecognizer : MonoBehaviour
             case HandState.Pointing:
                 if (pointingGesture.CheckConditions(args))
                 {
-                    DebugInfoStaticController.ToTerminalQuoe($"🟩 Жест продолжается");
                     if (TryGetTeleportTarget(hand, out Vector3 hitPoint, isLeft))
                     {
                         target = hitPoint;
-                        DebugInfoStaticController.ToTerminalQuoe($"🎯 Цель обновлена: {hitPoint}");
                         if (teleportPreviewPrefab)
                         {
                             if (preview == null)
@@ -157,12 +137,10 @@ public class HandRecognizer : MonoBehaviour
                     {
                         target = null;
                         if (preview) Destroy(preview);
-                        DebugInfoStaticController.ToTerminalQuoe("❌ Цель потеряна");
                     }
                 }
                 else
                 {
-                    DebugInfoStaticController.ToTerminalQuoe($"🔴 Жест завершён → ожидаем сжатие");
                     state = HandState.AwaitingSqueeze;
                     confirm = 0;
                 }
@@ -172,10 +150,8 @@ public class HandRecognizer : MonoBehaviour
                 if (AreFingersSqueezed(hand, fingersToSqueeze, squeezeThreshold))
                 {
                     confirm++;
-                    DebugInfoStaticController.ToTerminalQuoe($"🟡 Сжатие: {confirm}/{confirmationFrames}");
                     if (confirm >= confirmationFrames && target.HasValue)
                     {
-                        DebugInfoStaticController.ToTerminalQuoe($"🔥 ТЕЛЕПОРТАЦИЯ В {target.Value}");
                         TeleportTo(target.Value);
                         state = HandState.Triggered;
                         confirm = 0;
@@ -185,7 +161,6 @@ public class HandRecognizer : MonoBehaviour
                 }
                 else
                 {
-                    DebugInfoStaticController.ToTerminalQuoe($"🔵 Сжатие отменено");
                     state = HandState.Idle;
                     confirm = 0;
                     if (preview) Destroy(preview);
@@ -196,7 +171,6 @@ public class HandRecognizer : MonoBehaviour
             case HandState.Triggered:
                 if (!AreFingersSqueezed(hand, fingersToSqueeze, squeezeThreshold))
                 {
-                    DebugInfoStaticController.ToTerminalQuoe($"🟢 Сброс состояния");
                     state = HandState.Idle;
                 }
                 break;
@@ -229,7 +203,6 @@ public class HandRecognizer : MonoBehaviour
 
         if (!TryGetPointingRay(hand, out Ray ray, isLeft))
         {
-            DebugInfoStaticController.ToTerminalQuoe($"Луч из {ray.origin} в направлении {ray.direction}");
             return false;
         }
             
@@ -281,14 +254,8 @@ public class HandRecognizer : MonoBehaviour
 
         //ray = new Ray(origin, direction);
 
-        // 🔥 ОТЛАДКА: рисуем луч в Scene View
+        // ОТЛАДКА: рисуем луч в Scene View
         //Debug.DrawRay(origin, direction * 10f, Color.red, 0.1f);
-
-        // Логируем начало луча
-        if (!isLeft)
-           DebugInfoStaticController.ToTerminalQuoe($"🎯 Начало луча: {rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.position}");
-        else
-           DebugInfoStaticController.ToTerminalQuoe($"🎯 Начало луча: {leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.position}");
 
         return true;
     
@@ -312,7 +279,6 @@ public class HandRecognizer : MonoBehaviour
     {
         if (teleportationProvider == null)
         {
-            DebugInfoStaticController.ToTerminalQuoe("Teleportation Provider не назначен! Перетащи его в инспекторе.");
             return;
         }
 
