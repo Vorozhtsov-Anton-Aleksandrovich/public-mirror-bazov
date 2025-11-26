@@ -582,7 +582,7 @@ GameObject:
   - component: {fileID: 8257598310686700253}
   m_Layer: 0
   m_Name: XR Origin (VR)
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
@@ -733,7 +733,7 @@ CharacterController:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Height: 2
   m_Radius: 0.5
@@ -1372,7 +1372,7 @@ MonoBehaviour:
   m_InteractionManager: {fileID: 0}
   m_InteractionLayers:
     m_Bits: 4294967295
-  m_Handedness: 0
+  m_Handedness: 1
   m_AttachTransform: {fileID: 3460323100795350179}
   m_KeepSelectedTargetValid: 1
   m_DisableVisualsWhenBlockedInGroup: 1
@@ -1392,6 +1392,8 @@ MonoBehaviour:
       m_Calls: []
   m_StartingHoverFilters: []
   m_StartingSelectFilters: []
+  pinchVisual: {fileID: 0}
+  fistVisual: {fileID: 0}
 --- !u!114 &3037193267027885073
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1405,6 +1407,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pinchThreshold: 0.03
+  pinchAttachPoint: {fileID: 3460323100795350179}
+  fistThreshold: 0.08
+  fistAttachPoint: {fileID: 3460323100795350179}
+  fistFingers: 060000000b00000010000000150000001a000000
+  prioritizePinchOverFist: 1
+  releaseThresholdMultiplier: 1.2
 --- !u!4 &2692097853843322151 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8279425768049988373, guid: 2088a2a54134260428f016a9fb0c638e, type: 3}
@@ -2047,7 +2055,7 @@ MonoBehaviour:
   m_InteractionManager: {fileID: 0}
   m_InteractionLayers:
     m_Bits: 4294967295
-  m_Handedness: 0
+  m_Handedness: 2
   m_AttachTransform: {fileID: 5802146970558092738}
   m_KeepSelectedTargetValid: 1
   m_DisableVisualsWhenBlockedInGroup: 1
@@ -2067,6 +2075,8 @@ MonoBehaviour:
       m_Calls: []
   m_StartingHoverFilters: []
   m_StartingSelectFilters: []
+  pinchVisual: {fileID: 0}
+  fistVisual: {fileID: 0}
 --- !u!114 &7566941056931306619
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2080,6 +2090,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pinchThreshold: 0.03
+  pinchAttachPoint: {fileID: 5802146970558092738}
+  fistThreshold: 0.08
+  fistAttachPoint: {fileID: 5802146970558092738}
+  fistFingers: 060000000b00000010000000150000001a000000
+  prioritizePinchOverFist: 1
+  releaseThresholdMultiplier: 1.2
 --- !u!4 &2539662555240367687 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8174001811309047470, guid: eaeda8d59fec30d489d2f89b2f1b50b3, type: 3}
