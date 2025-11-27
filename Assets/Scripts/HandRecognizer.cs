@@ -14,49 +14,87 @@ using UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation;
 public class HandRecognizer : MonoBehaviour
 {
     [Header("🔹 Жест и сжатие")]
+    // Предопределенный жест, который распознается как "указание" (обычно указательный палец вытянут)
     public XRHandShape pointingGesture;
+    
+    // Пальцы, которые должны быть сжаты для активации телепортации
+    // По умолчанию - указательный и средний пальцы в дистальной точке
     public XRHandJointID[] fingersToSqueeze = { XRHandJointID.IndexDistal, XRHandJointID.MiddleDistal };
+    
+    // Порог расстояния между кончиками пальцев и ладонью для определения "сжатия"
+    // Если расстояние меньше этого порога - считаем, что пальцы сжаты
     public float squeezeThreshold = 0.08f;
+    
+    // Количество кадров, в течение которых должно сохраняться условие сжатия
+    // Это предотвращает случайные срабатывания телепортации
     public int confirmationFrames = 2;
 
     [Header("🔹 Телепортация")]
-    public LayerMask teleportLayerMask = 1; // ← обязательно настрой!
+    // Слой, по которому можно телепортироваться (пол, платформы)
+    // ВАЖНО: нужно настроить в инспекторе, обычно это "Default" или "Ground"
+    public LayerMask teleportLayerMask = 1;
+    
+    // Максимальная дистанция телепортации
     public float maxTeleportDistance = 10f;
-    public GameObject teleportPreviewPrefab; // опционально
+    
+    // Префаб, который отображается в точке телепортации (курсор, подсветка)
+    public GameObject teleportPreviewPrefab;
 
     [Header("🔹 Ссылки")]
-    public XROrigin xrOrigin; // ← должен быть назначен!
+    // Ссылка на XROrigin - корневой объект VR-камеры и контроллеров
+    public XROrigin xrOrigin;
+    
+    // События обновления суставов левой и правой рук
+    // Используются для получения данных о положении пальцев
     public XRHandTrackingEvents leftHandEvents;
     public XRHandTrackingEvents rightHandEvents;
 
-    // ДОБАВЛЯЕМ: ссылку на Teleportation Provider (из XRI 3.0+)
+    // Ссылка на TeleportationProvider из XR Interaction Toolkit v3.0+
+    // Отвечает за обработку запросов на телепортацию
     [Header("🔹 Teleportation Provider (XRI 3.0+)")]
-    public TeleportationProvider teleportationProvider; // ← ПРИКРЕПИ ЭТО В ИНСПЕКТОРЕ!
+    public TeleportationProvider teleportationProvider;
 
     // ─────────────────────────────────────────────
     // СОСТОЯНИЯ И КЭШ
     // ─────────────────────────────────────────────
 
-    private enum HandState { Idle, Pointing, AwaitingSqueeze, Triggered }
+    // Состояния обработки жестов для каждой руки
+    private enum HandState { 
+        Idle,           // Рука неактивна, жест не распознается
+        Pointing,       // Распознан жест указания (указательный палец вытянут)
+        AwaitingSqueeze,// Ожидание сжатия пальцев для подтверждения телепортации
+        Triggered       // Телепортация активирована, ожидание разжатия пальцев
+    }
     
+    // Текущие состояния для левой и правой руки
     private HandState leftState = HandState.Idle;
     private HandState rightState = HandState.Idle;
+    
+    // Счетчики для подтверждения жеста (должен продержаться указанное количество кадров)
     private int leftConfirm = 0, rightConfirm = 0;
 
+    // Префабы-превью телепортации для каждой руки
     private GameObject leftPreview, rightPreview;
+    
+    // Точки телепортации для каждой руки (null, если нет валидной цели)
     private Vector3? leftTarget, rightTarget;
 
     // ─────────────────────────────────────────────
     // ПОДПИСКА
     // ─────────────────────────────────────────────
 
+    /// <summary>
+    /// Подписка на события обновления суставов рук при активации объекта
+    /// </summary>
     void OnEnable()
     {
         if (leftHandEvents) leftHandEvents.jointsUpdated.AddListener(OnLeftHand);
         if (rightHandEvents) rightHandEvents.jointsUpdated.AddListener(OnRightHand);
-        
     }
 
+    /// <summary>
+    /// Отписка от событий и очистка при деактивации объекта
+    /// </summary>
     void OnDisable()
     {
         if (leftHandEvents) leftHandEvents.jointsUpdated.RemoveListener(OnLeftHand);
@@ -64,6 +102,9 @@ public class HandRecognizer : MonoBehaviour
         Cleanup();
     }
 
+    /// <summary>
+    /// Удаляет превью телепортации и сбрасывает целевые точки
+    /// </summary>
     void Cleanup()
     {
         if (leftPreview) Destroy(leftPreview);
@@ -75,38 +116,58 @@ public class HandRecognizer : MonoBehaviour
     // ОБРАБОТКА РУК (БЕЗ REF!)
     // ─────────────────────────────────────────────
 
+    /// <summary>
+    /// Обработчики событий обновления суставов для левой и правой руки
+    /// Направляют данные в общий метод обработки
+    /// </summary>
     void OnLeftHand(XRHandJointsUpdatedEventArgs args) => ProcessHand(args, true);
     void OnRightHand(XRHandJointsUpdatedEventArgs args) => ProcessHand(args, false);
 
-   void ProcessHand(XRHandJointsUpdatedEventArgs args, bool isLeft)
+    /// <summary>
+    /// Основная логика обработки жестов для руки
+    /// </summary>
+    /// <param name="args">Данные об обновлении суставов руки</param>
+    /// <param name="isLeft">true для левой руки, false для правой</param>
+    void ProcessHand(XRHandJointsUpdatedEventArgs args, bool isLeft)
     {
-
-        // Используем обычные переменные вместо ref — чтобы избежать CS1510
+        // Получаем текущее состояние руки
         HandState state = isLeft ? leftState : rightState;
         int confirm = isLeft ? leftConfirm : rightConfirm;
         GameObject preview = isLeft ? leftPreview : rightPreview;
         Vector3? target = isLeft ? leftTarget : rightTarget;
 
         var hand = args.hand;
+        
+        // Если рука не отслеживается, сбрасываем состояние
         if (!hand.isTracked)
         {
             if (isLeft) { leftState = HandState.Idle; leftConfirm = 0; }
             else { rightState = HandState.Idle; rightConfirm = 0; }
+            
+            // Удаляем превью телепортации
             if (preview) Destroy(preview);
             if (isLeft) leftTarget = null; else rightTarget = null;
             return;
         }
 
-        float up_velocity = isLeft ? leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.up.y : rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.up.y;
+        // Проверяем вертикальную скорость запястья (костыль для определения направления руки)
+        // Использует внутреннюю иерархию объектов для получения трансформа запястья
+        float up_velocity = isLeft ? 
+            leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.up.y : 
+            rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.up.y;
 
+        // Конечный автомат обработки состояний руки
         switch (state)
         {
             case HandState.Idle:
-                if (pointingGesture && pointingGesture.CheckConditions(args) && up_velocity < 0.0f)
+                // Проверяем, распознается ли жест указания и направлен ли жест вниз
+                if (pointingGesture && pointingGesture.CheckConditions(args) && up_velocity < -0.1f)
                 {
+                    // Пытаемся найти точку телепортации
                     if (TryGetTeleportTarget(hand, out Vector3 hitPoint, isLeft))
                     {
                         target = hitPoint;
+                        // Создаем превью телепортации
                         if (teleportPreviewPrefab)
                             preview = Instantiate(teleportPreviewPrefab, hitPoint, Quaternion.identity);
                     }
@@ -115,18 +176,21 @@ public class HandRecognizer : MonoBehaviour
                         target = null;
                         preview = null;
                     }
-                    state = HandState.Pointing;
+                    state = HandState.Pointing; // Переходим в состояние указания
                 }
                 break;
 
             case HandState.Pointing:
+                // Если жест указания все еще активен
                 if (pointingGesture.CheckConditions(args))
                 {
+                    // Обновляем превью телепортации
                     if (TryGetTeleportTarget(hand, out Vector3 hitPoint, isLeft))
                     {
                         target = hitPoint;
                         if (teleportPreviewPrefab)
                         {
+                            // Создаем превью, если его нет, или обновляем позицию
                             if (preview == null)
                                 preview = Instantiate(teleportPreviewPrefab, hitPoint, Quaternion.identity);
                             else
@@ -135,32 +199,38 @@ public class HandRecognizer : MonoBehaviour
                     }
                     else
                     {
+                        // Если точки телепортации нет - удаляем превью
                         target = null;
                         if (preview) Destroy(preview);
                     }
                 }
                 else
                 {
+                    // Жест указания прекратился, переходим к ожиданию сжатия
                     state = HandState.AwaitingSqueeze;
                     confirm = 0;
                 }
                 break;
 
             case HandState.AwaitingSqueeze:
+                // Проверяем, сжаты ли пальцы
                 if (AreFingersSqueezed(hand, fingersToSqueeze, squeezeThreshold))
                 {
                     confirm++;
+                    // Если сжатие подтверждено достаточное количество кадров и есть цель
                     if (confirm >= confirmationFrames && target.HasValue)
                     {
-                        TeleportTo(target.Value);
+                        TeleportTo(target.Value); // Выполняем телепортацию
                         state = HandState.Triggered;
                         confirm = 0;
+                        // Удаляем превью после телепортации
                         if (preview) Destroy(preview);
                         target = null;
                     }
                 }
                 else
                 {
+                    // Если пальцы разжаты - возвращаемся в исходное состояние
                     state = HandState.Idle;
                     confirm = 0;
                     if (preview) Destroy(preview);
@@ -169,6 +239,7 @@ public class HandRecognizer : MonoBehaviour
                 break;
 
             case HandState.Triggered:
+                // Ожидаем разжатия пальцев для возврата в исходное состояние
                 if (!AreFingersSqueezed(hand, fingersToSqueeze, squeezeThreshold))
                 {
                     state = HandState.Idle;
@@ -176,7 +247,7 @@ public class HandRecognizer : MonoBehaviour
                 break;
         }
 
-        // Сохраняем изменения обратно в поля
+        // Сохраняем обновленные значения в поля класса
         if (isLeft)
         {
             leftState = state;
@@ -197,16 +268,20 @@ public class HandRecognizer : MonoBehaviour
     // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
     // ─────────────────────────────────────────────
 
+    /// <summary>
+    /// Пытается найти точку телепортации по направлению взгляда руки
+    /// </summary>
     bool TryGetTeleportTarget(XRHand hand, out Vector3 hitPoint, bool isLeft)
     {
         hitPoint = Vector3.zero;
 
+        // Получаем луч указания
         if (!TryGetPointingRay(hand, out Ray ray, isLeft))
         {
             return false;
         }
             
-
+        // Стреляем лучом для определения точки телепортации
         if (Physics.Raycast(ray, out RaycastHit hit, maxTeleportDistance, teleportLayerMask))
         {
             hitPoint = hit.point;
@@ -216,19 +291,27 @@ public class HandRecognizer : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Формирует луч указания на основе позиции запястья и пальцев
+    /// </summary>
     bool TryGetPointingRay(XRHand hand, out Ray ray, bool isLeft)
     {
+        // Рисуем отладочные лучи для визуализации в редакторе
         if (!isLeft)
-            Debug.DrawRay(rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.position, rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.forward * 10f, Color.yellow, 0.1f);
+            Debug.DrawRay(rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.position, 
+                rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.forward * 10f, Color.yellow, 0.1f);
         else
-            Debug.DrawRay(leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.position, leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.forward * 10f, Color.yellow, 0.1f);
+            Debug.DrawRay(leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.position, 
+                leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.forward * 10f, Color.yellow, 0.1f);
         
         ray = default;
 
+        // Получаем позы ключевых суставов
         var wrist = hand.GetJoint(XRHandJointID.Wrist);
         var index = hand.GetJoint(XRHandJointID.IndexProximal);
         var middle = hand.GetJoint(XRHandJointID.MiddleProximal);
 
+        // Проверяем, доступны ли данные о суставах
         if (!wrist.TryGetPose(out Pose w) || 
             !index.TryGetPose(out Pose i) || 
             !middle.TryGetPose(out Pose m))
@@ -236,38 +319,37 @@ public class HandRecognizer : MonoBehaviour
             return false;
         }
 
-        //// 🔥 ИСПОЛЬЗУЕМ МИРОВЫЕ ПОЗИЦИИ НАПРЯМУЮ
-        //Vector3 origin = w.position; // ← позиция запястья в мировом пространстве
-//
-        //// Направление — от запястья к средней точке кончиков пальцев
-        //Vector3 tipCenter = (i.position + m.position) * 0.5f;
-        //Vector3 direction = (tipCenter - origin).normalized;
-//
-        //// 🔥 ДОБАВЛЯЕМ НАКЛОН ВНИЗ — чтобы луч пересекал пол
-        //direction.y -= 0.5f; // ← наклон вниз
-        //direction.Normalize(); // ← нормализуем обратно
+        // ЗАККОМЕНЧЕННЫЙ УЛУЧШЕННЫЙ АЛГОРИТМ:
+        // Vector3 origin = w.position; // Позиция запястья
+        // Vector3 tipCenter = (i.position + m.position) * 0.5f; // Центр между пальцами
+        // Vector3 direction = (tipCenter - origin).normalized; // Направление от запястья к пальцам
+        // direction.y -= 0.5f; // Наклон вниз для лучшего попадания в пол
+        // direction.Normalize();
 
+        // ТЕКУЩИЙ АЛГОРИТМ (использует forward-направление запястья):
         if (!isLeft)
-            ray = new Ray(rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.position, rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.forward);
+            ray = new Ray(rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.position, 
+                rightHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("R_Wrist").transform.forward);
         else
-            ray = new Ray(leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.position, leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.forward);
-
-        //ray = new Ray(origin, direction);
-
-        // ОТЛАДКА: рисуем луч в Scene View
-        //Debug.DrawRay(origin, direction * 10f, Color.red, 0.1f);
+            ray = new Ray(leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.position, 
+                leftHandEvents.gameObject.GetNamedChild("Armature").GetNamedChild("L_Wrist").transform.forward);
 
         return true;
-    
     }
 
+    /// <summary>
+    /// Проверяет, сжаты ли указанные пальцы относительно ладони
+    /// </summary>
     bool AreFingersSqueezed(XRHand hand, XRHandJointID[] tips, float threshold)
     {
+        // Получаем позу ладони
         if (!hand.GetJoint(XRHandJointID.Palm).TryGetPose(out Pose palm))
             return false;
 
+        // Проверяем каждый указанный палец
         foreach (var tip in tips)
         {
+            // Если не можем получить позу пальца или расстояние до ладони больше порога
             if (!hand.GetJoint(tip).TryGetPose(out Pose t) || 
                 Vector3.Distance(t.position, palm.position) > threshold)
                 return false;
@@ -275,6 +357,9 @@ public class HandRecognizer : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Выполняет телепортацию в указанную точку через TeleportationProvider
+    /// </summary>
     void TeleportTo(Vector3 targetPosition)
     {
         if (teleportationProvider == null)
@@ -282,17 +367,17 @@ public class HandRecognizer : MonoBehaviour
             return;
         }
 
-        // Получаем текущую ориентацию игрока
+        // Сохраняем текущую ориентацию игрока
         Quaternion playerRotation = xrOrigin.transform.rotation;
 
-        // Создаём запрос телепортации
+        // Создаем запрос на телепортацию
         var request = new TeleportRequest
         {
             destinationPosition = targetPosition,
             destinationRotation = playerRotation
         };
 
-        // Вызываем телепортацию через XRI 3.0+
+        // Отправляем запрос через систему телепортации XRI
         teleportationProvider.QueueTeleportRequest(request);
     }
 }
