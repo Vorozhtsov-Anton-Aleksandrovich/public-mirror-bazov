@@ -10,15 +10,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: d299222809594ad45b4d3833198cd92b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.204
+      value: 1.2065716
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d299222809594ad45b4d3833198cd92b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.121
+      value: 0.04457808
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d299222809594ad45b4d3833198cd92b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.894
+      value: 1.8847944
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d299222809594ad45b4d3833198cd92b, type: 3}
       propertyPath: m_LocalRotation.w
@@ -54,7 +54,11 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: e85332c1b66f5254e9fc7911e8053144, type: 2}
     - target: {fileID: 919132149155446097, guid: d299222809594ad45b4d3833198cd92b, type: 3}
       propertyPath: m_Name
-      value: book_0_0_0
+      value: book
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: d299222809594ad45b4d3833198cd92b, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: d299222809594ad45b4d3833198cd92b, type: 3}
       propertyPath: m_IsActive
@@ -102,7 +106,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -8671397862077104796, guid: d299222809594ad45b4d3833198cd92b, type: 3}
 --- !u!54 &1064770678100929045

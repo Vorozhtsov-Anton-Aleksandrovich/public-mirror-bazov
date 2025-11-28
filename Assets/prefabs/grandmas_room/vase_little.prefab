@@ -10,15 +10,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 3224c4177d668944bbd7b9e75e051fc8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -4.68
+      value: -4.5808597
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3224c4177d668944bbd7b9e75e051fc8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.556
+      value: 1.3292238
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3224c4177d668944bbd7b9e75e051fc8, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.188
+      value: 1.6954619
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3224c4177d668944bbd7b9e75e051fc8, type: 3}
       propertyPath: m_LocalRotation.w
@@ -54,7 +54,11 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 188055b7b10b1604595317451887a606, type: 2}
     - target: {fileID: 919132149155446097, guid: 3224c4177d668944bbd7b9e75e051fc8, type: 3}
       propertyPath: m_Name
-      value: vase_little_0_0_0 (3)
+      value: vase_little
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3224c4177d668944bbd7b9e75e051fc8, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 3224c4177d668944bbd7b9e75e051fc8, type: 3}
       propertyPath: m_IsActive
@@ -98,7 +102,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 8911256315035477338, guid: 3224c4177d668944bbd7b9e75e051fc8, type: 3}
 --- !u!54 &4132329869364610512
