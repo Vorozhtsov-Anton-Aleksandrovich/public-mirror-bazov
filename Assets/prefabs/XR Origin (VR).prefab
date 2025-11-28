@@ -580,7 +580,7 @@ GameObject:
   - component: {fileID: 652113026355145022}
   - component: {fileID: 8372180478581647721}
   - component: {fileID: 8257598310686700253}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: XR Origin (VR)
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -684,7 +684,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   maxTeleportDistance: 10
-  teleportPreviewPrefab: {fileID: 0}
+  teleportPreviewPrefab: {fileID: 9029982198673950640, guid: c3f4c33bb6cf76247a34483f6592a6f1, type: 3}
   xrOrigin: {fileID: 8576668505709730936}
   leftHandEvents: {fileID: 7189911182549746469}
   rightHandEvents: {fileID: 5502404923409216747}

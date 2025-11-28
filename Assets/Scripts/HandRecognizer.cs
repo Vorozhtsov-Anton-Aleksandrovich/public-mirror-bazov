@@ -269,25 +269,42 @@ public class HandRecognizer : MonoBehaviour
     // ─────────────────────────────────────────────
 
     /// <summary>
-    /// Пытается найти точку телепортации по направлению взгляда руки
+    /// Пытается найти точку телепортации, но блокирует телепортацию, если луч пересекает
+    /// объект, НЕ входящий в teleportLayerMask, до целевой точки.
     /// </summary>
     bool TryGetTeleportTarget(XRHand hand, out Vector3 hitPoint, bool isLeft)
     {
         hitPoint = Vector3.zero;
 
-        // Получаем луч указания
         if (!TryGetPointingRay(hand, out Ray ray, isLeft))
         {
             return false;
         }
-            
-        // Стреляем лучом для определения точки телепортации
-        if (Physics.Raycast(ray, out RaycastHit hit, maxTeleportDistance, teleportLayerMask))
+
+        // Получаем ВСЕ пересечения вдоль луча
+        RaycastHit[] allHits = Physics.RaycastAll(ray, maxTeleportDistance);
+
+        // Сортируем по расстоянию (ближайшие первыми)
+        System.Array.Sort(allHits, (a, b) => a.distance.CompareTo(b.distance));
+
+        // Ищем первую точку, подходящую для телепортации
+        foreach (RaycastHit hit in allHits)
         {
+            int hitLayer = 1 << hit.collider.gameObject.layer;
+
+            // Если объект НЕ входит в teleportLayerMask — он блокирует телепортацию
+            if ((teleportLayerMask.value & hitLayer) == 0)
+            {
+                // Объект не для телепортации → блокируем всё
+                return false;
+            }
+
+            // Если объект ВХОДИТ в teleportLayerMask — это наша цель
             hitPoint = hit.point;
             return true;
         }
 
+        // Ничего не найдено
         return false;
     }
 
