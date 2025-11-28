@@ -6190,7 +6190,7 @@ PrefabInstance:
     - target: {fileID: 8160943998626123147, guid: f715bfddb3580e14683742dafbb15abc, type: 3}
       propertyPath: teleportPreviewPrefab
       value: 
-      objectReference: {fileID: 346044723}
+      objectReference: {fileID: 265894483128401800, guid: c116c5bcddce9444386f5720823f25bc, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
