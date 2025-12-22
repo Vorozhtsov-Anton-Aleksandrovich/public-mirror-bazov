@@ -51,8 +51,15 @@ public class PinchGrabInteractor : XRBaseInteractor
         // Сбрасываем сохраненную позу захвата для обновления attach point
         if (currentInteractable != null && interactionManager != null)
         {
-            interactionManager.SelectExit(this, currentInteractable);
-            interactionManager.SelectEnter(this, currentInteractable);
+            try
+            {
+                interactionManager.SelectExit(this, currentInteractable);
+                interactionManager.SelectEnter(this, currentInteractable);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError("Ошибка при работе с InteractionManager: " + e.Message);
+            }
         }
     }
     

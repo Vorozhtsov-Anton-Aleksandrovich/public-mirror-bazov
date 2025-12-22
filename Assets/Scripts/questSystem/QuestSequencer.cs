@@ -30,8 +30,7 @@ public class QuestSequencer : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject);
-            return;
+            Destroy(Instance);
         }
         Instance = this;
 

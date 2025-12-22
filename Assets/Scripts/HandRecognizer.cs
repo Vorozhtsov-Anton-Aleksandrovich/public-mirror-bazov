@@ -40,6 +40,9 @@ public class HandRecognizer : MonoBehaviour
     // Префаб, который отображается в точке телепортации (курсор, подсветка)
     public GameObject teleportPreviewPrefab;
 
+    [Header("🔹 Raycast")]
+    public LayerMask passThroughLayers = 0; // По умолчанию - нет слоев
+
     [Header("🔹 Ссылки")]
     // Ссылка на XROrigin - корневой объект VR-камеры и контроллеров
     public XROrigin xrOrigin;
@@ -269,8 +272,7 @@ public class HandRecognizer : MonoBehaviour
     // ─────────────────────────────────────────────
 
     /// <summary>
-    /// Пытается найти точку телепортации, но блокирует телепортацию, если луч пересекает
-    /// объект, НЕ входящий в teleportLayerMask, до целевой точки.
+    /// Пытается найти точку телепортации, игнорируя объекты из passThroughLayers
     /// </summary>
     bool TryGetTeleportTarget(XRHand hand, out Vector3 hitPoint, bool isLeft)
     {
@@ -281,8 +283,9 @@ public class HandRecognizer : MonoBehaviour
             return false;
         }
 
-        // Получаем ВСЕ пересечения вдоль луча
-        RaycastHit[] allHits = Physics.RaycastAll(ray, maxTeleportDistance);
+        int raycastMask = ~passThroughLayers.value;
+
+        RaycastHit[] allHits = Physics.RaycastAll(ray, maxTeleportDistance, raycastMask);
 
         // Сортируем по расстоянию (ближайшие первыми)
         System.Array.Sort(allHits, (a, b) => a.distance.CompareTo(b.distance));

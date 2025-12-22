@@ -56,6 +56,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: tree
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 9cc0928cf885e9e4d9cb979ca3d50ae4, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 1595680294995585499, guid: 9cc0928cf885e9e4d9cb979ca3d50ae4, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 7113232789235503381, guid: 9cc0928cf885e9e4d9cb979ca3d50ae4, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -142,7 +150,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
+  m_StaticShadowCaster: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -201,7 +209,7 @@ LODGroup:
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 5710149803743764326}
-  - screenRelativeHeight: 0.1
+  - screenRelativeHeight: 0.013125907
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 5710149803743764326}
