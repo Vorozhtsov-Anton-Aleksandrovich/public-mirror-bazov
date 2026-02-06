@@ -35,7 +35,7 @@ MonoBehaviour:
   minHorizonOsSdkVersion: 60
   targetHorizonOsSdkVersion: 83
   skipUnneededShaders: 0
-  enableIL2CPPLTO: 0
+  enableIL2CPPLTO: 1
   removeGradleManifest: 1
   focusAware: 1
   requiresSystemKeyboard: 0
