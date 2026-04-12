@@ -29,38 +29,26 @@ public class PinchGrabInteractor : XRBaseInteractor
 
     public void StopGrab()
     {
-        if (!hasSelection) return;
-        
+        if (!hasSelection || interactablesSelected.Count == 0) return;
+
+        var target = interactablesSelected[0];
+
         currentInteractable = null;
         UpdateGrabVisuals();
-        
+
         if (interactionManager != null)
-        {
-            var target = interactablesSelected[0];
             interactionManager.SelectExit(this, target);
-        }
     }
     
     public void ChangeGrabType(GrabType newGrabType)
     {
         if (!hasSelection) return;
-        
+
         currentGrabType = newGrabType;
         UpdateGrabVisuals();
-        
-        // Сбрасываем сохраненную позу захвата для обновления attach point
-        if (currentInteractable != null && interactionManager != null)
-        {
-            try
-            {
-                interactionManager.SelectExit(this, currentInteractable);
-                interactionManager.SelectEnter(this, currentInteractable);
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError("Ошибка при работе с InteractionManager: " + e.Message);
-            }
-        }
+
+        // ❗ НЕ трогаем InteractionManager
+        // Просто меняем attachTransform — этого достаточно
     }
     
     void UpdateGrabVisuals()
