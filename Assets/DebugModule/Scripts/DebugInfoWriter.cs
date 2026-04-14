@@ -4,32 +4,45 @@ using UnityEngine;
 public class DebugInfoWriter : MonoBehaviour
 {
     [SerializeField]
-    public TextMeshPro console;
+    private TextMeshPro console; // лучше сделать private, если не нужно извне
 
-    void Start()
+    private void Start()
     {
-        DebugInfoStaticController.OnWriteInfo += updateTerminal;
+        // Если ссылка не назначена в инспекторе – попытаемся найти компонент на этом же объекте
+        if (console == null)
+            console = GetComponent<TextMeshPro>();
+
+        // Если всё равно null – выведем предупреждение и не подписываемся
+        if (console == null)
+        {
+            Debug.LogError("DebugInfoWriter: TextMeshPro component not assigned and not found on GameObject!");
+            return;
+        }
+
+        DebugInfoStaticController.OnWriteInfo += UpdateTerminal;
         DebugInfoStaticController.ToTerminalQuoe("terminal is INIT");
     }
 
-    private void updateTerminal()
+    private void UpdateTerminal()
     {
-        string allMaseges = "";
+        if (console == null) return; // защита от null
+
+        string allMessages = "";
         foreach (string line in DebugInfoStaticController.TerminalList)
         {
-            allMaseges += line + "\n";
+            allMessages += line + "\n";
         }
 
-        console.text = allMaseges;
+        console.text = allMessages;
     }
 
-    void FixedUpdate()
-    {
-        updateTerminal();
-    }
+    // Вместо FixedUpdate можно вызывать обновление только при событии,
+    // но если нужно гарантированно обновлять каждый кадр – оставьте.
+    // private void FixedUpdate() { UpdateTerminal(); }
 
-    ~DebugInfoWriter()
+    private void OnDestroy()
     {
-        DebugInfoStaticController.OnWriteInfo -= updateTerminal;
+        // Отписываемся от события, чтобы избежать утечек памяти
+        DebugInfoStaticController.OnWriteInfo -= UpdateTerminal;
     }
 }
