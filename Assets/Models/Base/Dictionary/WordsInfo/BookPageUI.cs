@@ -25,8 +25,8 @@ public class BookPageUI : MonoBehaviour
 
     public void ShowWord(DictionaryWord data, int current, int total)
     {
-        emptyPagePanel?.SetActive(false);
-        contentPanel?.SetActive(true);
+        if (emptyPagePanel != null) emptyPagePanel.SetActive(false);
+        if (contentPanel != null) contentPanel.SetActive(true);
 
         if (wordText != null) wordText.text = data.word.ToUpper();
         if (meaningText != null) meaningText.text = data.meaning;
@@ -39,14 +39,14 @@ public class BookPageUI : MonoBehaviour
         {
             bool hasImage = data.illustration != null;
             illustrationImage.sprite = data.illustration;
-            illustrationFrame?.SetActive(hasImage);
+            if (illustrationFrame != null) illustrationFrame.SetActive(hasImage);
             illustrationImage.gameObject.SetActive(hasImage);
         }
     }
 
     public void ShowEmpty()
     {
-        emptyPagePanel?.SetActive(true);
-        contentPanel?.SetActive(false);
+        if (emptyPagePanel != null) emptyPagePanel.SetActive(false);
+        if (contentPanel != null) contentPanel.SetActive(true);
     }
 }

@@ -93,4 +93,9 @@ public class BookPageManager : MonoBehaviour
             ShowCurrentPage();
         }
     }
+
+    void Start()
+    {
+        RefreshWords();
+    }
 }
