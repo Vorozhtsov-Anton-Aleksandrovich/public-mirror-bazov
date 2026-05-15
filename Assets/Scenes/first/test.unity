@@ -943,6 +943,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a7367fec5b9c28344932b67927f643cb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 622975815}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a7367fec5b9c28344932b67927f643cb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 622975817}
   m_SourcePrefab: {fileID: 100100000, guid: a7367fec5b9c28344932b67927f643cb, type: 3}
 --- !u!4 &622975813 stripped
 Transform:
@@ -994,6 +997,24 @@ MonoBehaviour:
   illustrationImage: {fileID: 1107117988}
   quoteText: {fileID: 1237378983}
   taleTitleText: {fileID: 1933961160}
+--- !u!114 &622975817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 622975814}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26f7546ce0da68c44a2e1aaef8785999, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BookPageSwipe
+  leftHand: {fileID: 966532592}
+  rightHand: {fileID: 966532591}
+  swipeThreshold: 0.08
+  swipeTimeLimit: 0.5
+  detectionRadius: 0.12
+  cooldown: 0.8
 --- !u!1 &717134938
 GameObject:
   m_ObjectHideFlags: 0
@@ -2030,6 +2051,28 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4c065277b5da5c24d9e3cffc7651b925, type: 2}
   - {fileID: 11400000, guid: 241977063ea68834b9dd1fd988ef6430, type: 2}
   - {fileID: 11400000, guid: ce22dcb23a98f0e429a0cc96f643463d, type: 2}
+--- !u!114 &966532591 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7566941056931306619, guid: f715bfddb3580e14683742dafbb15abc, type: 3}
+  m_PrefabInstance: {fileID: 966532587}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0331424d63bf5b34fa888de5ab798cdb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &966532592 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3037193267027885073, guid: f715bfddb3580e14683742dafbb15abc, type: 3}
+  m_PrefabInstance: {fileID: 966532587}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0331424d63bf5b34fa888de5ab798cdb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &988373508
 GameObject:
   m_ObjectHideFlags: 0
