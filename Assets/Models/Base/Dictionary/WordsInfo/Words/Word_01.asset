@@ -26,5 +26,5 @@ MonoBehaviour:
   taleQuote: "\u041A\u0430\u043C\u0435\u043D\u044C \u043C\u044B \u043D\u0435 \u0440\u0430\u0437\u0443\u043C\u0435\u0435\u043C...
     \u0412 \u0442\u043E\u043C \u0446\u0432\u0435\u0442\u043A\u0435 \u043A\u0440\u0430\u0441\u043E\u0442\u0430
     \u043F\u043E\u043A\u0430\u0437\u0430\u043D\u0430"
-  illustration: {fileID: 0}
+  illustration: {fileID: 21300000, guid: 8d71df0486467e246ba0514983c5697c, type: 3}
   isUnlocked: 1

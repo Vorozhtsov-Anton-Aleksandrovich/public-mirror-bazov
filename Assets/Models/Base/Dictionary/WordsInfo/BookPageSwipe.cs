@@ -116,7 +116,7 @@ public class BookPageSwipe : MonoBehaviour
 
         lastSwipeTime = Time.time;
 
-        if (horizontalDelta < 0)
+        if (horizontalDelta > 0)
         {
             pageManager?.NextPage();
             Debug.Log("[BookPageSwipe] → Следующая страница");

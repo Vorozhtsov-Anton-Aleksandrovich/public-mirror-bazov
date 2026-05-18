@@ -32,5 +32,5 @@ MonoBehaviour:
     \u0437\u043C\u0435\u0435\u0432\u0438\u043A\u0430 \u0434\u0430 \u0434\u043E\u0440\u043E\u0436\u043D\u043E\u0433\u043E
     \u0441\u043E\u043A\u0443 \u0442\u0430\u043A\u0430\u044F \u0448\u0442\u0443\u043A\u0430
     \u0432\u044B\u0448\u043B\u0430"
-  illustration: {fileID: 0}
+  illustration: {fileID: 21300000, guid: 1c02e116d1646804d9bc04fc6643ca2c, type: 3}
   isUnlocked: 1
