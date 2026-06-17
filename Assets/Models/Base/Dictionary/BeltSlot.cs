@@ -18,10 +18,11 @@ public class BeltSlot : MonoBehaviour
         // Проверяем, что объект НЕ в руке
         if (grab.isSelected) return;
 
-        AttachItem(grab);
+        if(grab.CompareTag("Dictionary"))
+            AttachItem(grab);
     }
 
-    void AttachItem(XRGrabInteractable item)
+    public void AttachItem(XRGrabInteractable item)
     {
         currentItem = item;
 
